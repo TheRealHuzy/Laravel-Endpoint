@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use DB;
 use App\Models\MyRequest;
 use App\Models\MyResponse;
+use App\Models\Meal;
+use App\Models\Tag;
 
 class DatabaseCommunicationGet{
 
@@ -52,19 +54,55 @@ class DatabaseCommunicationGet{
 
     public static function getRequestBasedData($request)
     {
-        //must be more delicate way that this
-        $response = DB::table('meal')
-            ->join('category', 'meal.idCategory', '=', 'category.id')
-            ->join('tags', 'meal.id', '=', 'tags.idMeal')
-            ->join('tag', 'tags.idTag', '=', 'tag.id')
-            ->join('ingredients', 'meal.id', '=', 'ingredients.idMeal')
-            ->join('ingredient', 'ingredients.idIngredient', '=', 'ingredient.id')
-            ->select('meal.id', 'meal.title', 'meal.description',
-                'category.title AS category', 'tag.title AS tag', 'ingredient.title AS ingredient')
-            ->get();
-        dd($response); 
-        return self::filterRequestResponse($response);
+        $var = Meal::take($request->perPage)->offset($request->perPage * ($request->page-1));
+        //dd($var);
+        if ($request->language != "en") {
+            $languages = self::getLanguages4Translate();
+            $chosenLang = null;
+            foreach ($languages as $language){
+                if ($language == $request->language) {
+                    $chosenLang = $request->language;
+                    break;
+                }
+            }
+            if ($chosenLang == null) dd('LangNotRegistered!'); //TODO throw exception
+            else {
+                
+            }
+
+            //dd($chosenLang);
+        }
+        //if ($request->language == 'de') $var->where('');
+        
+        $only = ['title', 'description'/*, 'languages'*/];
+        
+
+        //if($request->category != null) $var = $var->where('category', $request->category);
+        /*
+        $pero = $request->category;
+
+        if($request->category != null) $var = $var->whereHas('category', function ($q) use ($pero) {
+            $q->where('category', $pero);
+        });*/
+
+        if ($request->includeCategory) $only[] = 'category';
+        if ($request->includeTags) $only[] = 'tags';
+        if ($request->includeIngredients) $only[] = 'ingredients';
+
+        $col = collect($var->get());
+        $col = $col->map->only($only);/*->map(function ($value, $key)
+        {
+            dd($value[$key]->title);
+            return $value != null;
+        });*/
+
+        return json_encode($col);
     }
+
+
+
+//--------------------------------------------------------------------------------------------------
+
 
     private static function filterRequestResponse($response)
     {
@@ -80,7 +118,7 @@ class DatabaseCommunicationGet{
                 $i++;
                 continue;
             } else {
-
+                //TODO
             }
 
             $r = new MyResponse;
@@ -96,3 +134,16 @@ class DatabaseCommunicationGet{
         }
     }
 }
+//must be more delicate way that this
+//original query
+/*
+$response = DB::table('meal')
+            ->join('category', 'meal.idCategory', '=', 'category.id')
+            ->join('tags', 'meal.id', '=', 'tags.idMeal')
+            ->join('tag', 'tags.idTag', '=', 'tag.id')
+            ->join('ingredients', 'meal.id', '=', 'ingredients.idMeal')
+            ->join('ingredient', 'ingredients.idIngredient', '=', 'ingredient.id')
+            ->select('meal.id', 'meal.title', 'meal.description',
+                'category.title AS category', 'tag.title AS tag', 'ingredient.title AS ingredient')
+            ->get();
+*/

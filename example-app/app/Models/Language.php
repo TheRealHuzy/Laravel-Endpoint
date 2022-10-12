@@ -4,14 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Tag extends Model
+class Language extends Model
 {
     protected $fillable = [
-        'title',
+        'name',
         'slug'
     ];
 
-    protected $table = 'tag';
+    protected $table = 'language';
 
     protected $hidden = [
         'id',
@@ -20,8 +20,5 @@ class Tag extends Model
         'pivot'
     ];
 
-    public function languages()
-    {
-        return $this->belongsToMany(Language::class, 'tagTranslation', 'idTag', 'idLanguage');
-    }
+    protected $primaryKey = 'slug';
 }

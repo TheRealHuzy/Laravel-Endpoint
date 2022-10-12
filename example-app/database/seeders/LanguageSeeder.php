@@ -135,6 +135,6 @@ class LanguageSeeder extends Seeder
     }
 
     private function sleepBetweenCalls(){
-        usleep( 2 * 1000 );
+        usleep( 5 * 1000 );
     }
 }

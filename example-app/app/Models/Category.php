@@ -2,10 +2,19 @@
 
 namespace App\Models;
 
-class Category 
+use Illuminate\Database\Eloquent\Model;
+
+class Category extends Model
 {
     protected $fillable = [
         'title',
         'slug'
     ];
+
+    protected $table = 'ingredient';
+
+    public function languages()
+    {
+        return $this->belongsToMany(Language::class, 'categoryTranslation', 'idCategory', 'idLanguage');
+    }
 }
